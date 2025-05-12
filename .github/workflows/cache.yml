@@ -1,0 +1,45 @@
+name: Update Dog Breeds Cache
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # каждый день в 03:00 UTC
+  workflow_dispatch: # вручную по кнопке
+
+jobs:
+  update-cache:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Export environment variables
+        run: echo "DOG_API_KEY=${{ secrets.DOG_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Check DOG_API_KEY presence
+        run: |
+          if [ -z "$DOG_API_KEY" ]; then
+            echo "❌ DOG_API_KEY is missing"
+            exit 1
+          else
+            echo "✅ DOG_API_KEY is present"
+          fi
+
+      - name: Generate breed cache
+        run: npx tsx scripts/genCache.ts
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/dog_breeds_cache.json
+          git commit -m "chore: update dog breed cache [bot]" || echo "No changes to commit"
+          git push
