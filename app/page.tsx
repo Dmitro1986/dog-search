@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DogBreedCard } from "@/components/dog-breed-card";
-import { getRandomDogBreed, searchDogBreed } from "@/lib/dog-api";
+import { getRandomBreed as getRandomDogBreed, searchBreed as searchDogBreed } from "@/lib/dog-api";
 import { fetchBreedInfo } from "@/lib/fetch-breed-info";
 import { BreedDirectory } from "@/components/BreedDirectory";
 import { PawPrint } from "lucide-react";

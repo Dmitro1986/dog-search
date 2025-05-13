@@ -1,116 +1,106 @@
-/** @format */
+import { DogBreed, SearchResult, DogApiError } from '@/types/breed';
+import { CONFIG, ERRORS } from '@/constants/api-constants';
+import { normalizeSearchQuery, fuzzyMatch } from '@/utils/string-utils';
+import { CacheService } from '@/services/cache-service';
+import { LanguageDetector } from '@/services/language-detector';
 
-// This is a mock API for dog breeds
-// In a real application, you would connect to actual APIs
+const cacheService = new CacheService(CONFIG.CACHE_FILE_PATH);
+const languageDetector = new LanguageDetector();
 
-// Update the DogBreed interface to include an image URL
-export interface DogBreed {
-  name: string;
-  origin: string;
-  temperament: string;
-  lifeSpan: string;
-  description: string;
-  imageUrl: string;
-}
+/**
+ * Получает информацию о всех породах собак
+ * Сначала пытается получить из кеша, если нет - делает запрос к API
+ */
+export async function getAllBreeds(): Promise<DogBreed[]> {
+  try {
+    // Пробуем получить данные из кеша
+    const cachedData = await cacheService.get<DogBreed[]>();
+    if (cachedData) {
+      return cachedData;
+    }
 
-// Update the dogBreeds array to include image URLs
-const dogBreeds: DogBreed[] = [
-  {
-    name: "Немецкая овчарка",
-    origin: "Германия",
-    temperament: "Умный, преданный, уверенный",
-    lifeSpan: "9-13 лет",
-    description:
-      "Немецкая овчарка — порода собак, изначально использовавшаяся как пастушья и служебно-розыскная собака.",
-    imageUrl: "/placeholder.svg?height=300&width=400&text=Немецкая+овчарка",
-  },
-  {
-    name: "Хаски",
-    origin: "Сибирь",
-    temperament: "Дружелюбный, энергичный, общительный",
-    lifeSpan: "12-15 лет",
-    description:
-      "Сибирский хаски — заводская специализированная порода собак, выведенная чукчами северо-восточной части Сибири и зарегистрированная американскими кинологами в 1930-х годах.",
-    imageUrl: "/placeholder.svg?height=300&width=400&text=Хаски",
-  },
-  {
-    name: "Бульдог",
-    origin: "Англия",
-    temperament: "Спокойный, дружелюбный, решительный",
-    lifeSpan: "8-10 лет",
-    description:
-      "Английский бульдог — порода собак, относящаяся к группе молоссов. Бульдоги были выведены в Англии для травли быков.",
-    imageUrl: "/placeholder.svg?height=300&width=400&text=Бульдог",
-  },
-  {
-    name: "Пудель",
-    origin: "Франция",
-    temperament: "Умный, активный, гордый",
-    lifeSpan: "12-15 лет",
-    description:
-      "Пудель — порода собак, подразделяющаяся на четыре разновидности: большой, малый, карликовый и той-пудель.",
-    imageUrl: "/placeholder.svg?height=300&width=400&text=Пудель",
-  },
-  {
-    name: "Сиба-ину",
-    origin: "Япония",
-    temperament: "Независимый, смелый, верный",
-    lifeSpan: "12-15 лет",
-    description:
-      "Сиба-ину, или сиба-кэн, — порода охотничьих собак, выведенная на японском острове Хонсю, самая мелкая из шести пород исконно японского происхождения. В 1936 году объявлена национальным достоянием Японии, где основное поголовье этих собак находится в городах!!!.",
-    imageUrl: "/placeholder.svg?height=300&width=400&text=Сиба-ину",
-  },
-];
+    // Если кеш пуст или устарел, делаем запрос к API
+    const response = await fetch(`${CONFIG.API_BASE_URL}/breeds`);
+    if (!response.ok) {
+      throw new DogApiError(
+        'Failed to fetch breeds',
+        ERRORS.FETCH_ERROR,
+        { status: response.status }
+      );
+    }
 
-export async function searchDogBreed(query: string) {
-  const res = await fetch("/api/search", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
-  });
+    const breeds = await response.json();
+    const enrichedBreeds = breeds.map((breed: any) => ({
+      name: breed.name,
+      origin: breed.origin || 'Unknown',
+      temperament: breed.temperament || 'Information not available',
+      lifeSpan: breed.life_span || 'Information not available',
+      description: breed.description || '',
+      imageUrl: breed.image?.url || ''
+    }));
 
-  const data = await res.json();
-  return data.result;
-}
+    // Сохраняем в кеш
+    await cacheService.set(enrichedBreeds);
 
-export async function getRandomDogBreed(): Promise<DogBreed> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  const randomIndex = Math.floor(Math.random() * dogBreeds.length);
-  return dogBreeds[randomIndex];
-}
-
-export async function getChatGPTInfo(breedName: string): Promise<string> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  const breed = dogBreeds.find(
-    (b) => b.name.toLowerCase() === breedName.toLowerCase()
-  );
-
-  if (breed) {
-    return `${breed.name} - это порода собак из ${
-      breed.origin
-    }. Эти собаки известны своим ${breed.temperament.toLowerCase()} характером. Средняя продолжительность жизни составляет ${
-      breed.lifeSpan
-    }. ${breed.description}`;
+    return enrichedBreeds;
+  } catch (error) {
+    if (error instanceof DogApiError) {
+      throw error;
+    }
+    throw new DogApiError(
+      'Failed to process breeds data',
+      ERRORS.PARSE_ERROR,
+      { originalError: error }
+    );
   }
-
-  return `Информация от ChatGPT о породе ${breedName}: Эта порода известна своим дружелюбным характером и преданностью хозяину. Собаки этой породы обычно хорошо ладят с детьми и другими животными. Они требуют регулярных физических упражнений и социализации.`;
 }
 
-export async function getWikipediaInfo(breedName: string): Promise<string> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1200));
+/**
+ * Поиск породы по названию с поддержкой нечеткого поиска
+ */
+export async function searchBreed(query: string): Promise<SearchResult[]> {
+  try {
+    const breeds = await getAllBreeds();
+    const normalizedQuery = normalizeSearchQuery(query);
+    
+    // Определяем язык запроса
+    const queryLanguage = await languageDetector.detect(query);
 
-  const breed = dogBreeds.find(
-    (b) => b.name.toLowerCase() === breedName.toLowerCase()
-  );
-
-  if (breed) {
-    return `Согласно Википедии, ${breed.name} - порода собак из ${breed.origin}. ${breed.description} Средняя продолжительность жизни: ${breed.lifeSpan}.`;
+    return breeds
+      .map(breed => {
+        const confidence = fuzzyMatch(breed.name, normalizedQuery);
+        return {
+          title: breed.name,
+          text: breed.description || breed.temperament,
+          source: 'The Dog API',
+          confidence,
+          imageUrl: breed.imageUrl
+        };
+      })
+      .filter(result => result.confidence >= CONFIG.SEARCH_THRESHOLD)
+      .sort((a, b) => b.confidence - a.confidence);
+  } catch (error) {
+    throw new DogApiError(
+      'Search failed',
+      ERRORS.SEARCH_ERROR,
+      { originalError: error }
+    );
   }
+}
 
-  return `Информация из Википедии о породе ${breedName}: Эта порода собак имеет богатую историю и была выведена для определенных целей. Сегодня эти собаки часто содержатся как домашние питомцы благодаря своему характеру и внешнему виду.`;
+/**
+ * Получает случайную породу
+ */
+export async function getRandomBreed(): Promise<DogBreed> {
+  try {
+    const breeds = await getAllBreeds();
+    const randomIndex = Math.floor(Math.random() * breeds.length);
+    return breeds[randomIndex];
+  } catch (error) {
+    throw new DogApiError(
+      'Failed to get random breed',
+      ERRORS.API_ERROR,
+      { originalError: error }
+    );
+  }
 }
