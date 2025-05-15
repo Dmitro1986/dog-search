@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { loadCacheFromAPI } from '@/services/client-cache-service';
+import { loadCacheFromAPI } from '../../services/client-cache-service';
 
 export default function CacheInitializer() {
   const [initialized, setInitialized] = useState(false);
