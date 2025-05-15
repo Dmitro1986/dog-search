@@ -1,5 +1,5 @@
 {
-  "timestamp": 1747167315593,
+  "timestamp": 1746987374585,
   "dataHash": "b65e95cb3e4c07aa92ba9d0c6ff51648e06b7d8423ad4764a989f0f3f3dd6774",
   "breeds": [
     {
@@ -2365,7 +2365,21 @@
       "height": "51 - 61",
       "bred_for": "Gundog, \"swamp-tromping\", Flushing, pointing, and retrieving water fowl & game birds",
       "breed_group": "Sporting",
-      "image_url": "https://cdn2.thedzdogapi.com/images/r1I4hl5Em.jpg",
+      "image_url": "https://cdn2.thedogapi.com/images/Bkam2l9Vm.jpg",
+      "wikipedia_url": ""
+    },
+    {
+      "id": 261,
+      "name": "Wirehaired Vizsla",
+      "description": "No description available",
+      "temperament": "Not specified",
+      "life_span": "12 - 14 years",
+      "origin": "Unknown",
+      "weight": "20 - 29",
+      "height": "55 - 64",
+      "bred_for": "Not specified",
+      "breed_group": "Sporting",
+      "image_url": "https://cdn2.thedogapi.com/images/r1I4hl5Em.jpg",
       "wikipedia_url": ""
     },
     {

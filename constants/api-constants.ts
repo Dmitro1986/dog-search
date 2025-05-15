@@ -1,5 +1,6 @@
 export const CONFIG = {
   API_BASE_URL: 'https://api.thedogapi.com/v1',
+  // CACHE_FILE_PATH: './data/dog_breeds_cache.json',
   CACHE_FILE_PATH: 'breeds_cache',
   CACHE_DURATION: 24 * 60 * 60 * 1000, // 24 hours
   DEBOUNCE_DELAY: 300,
