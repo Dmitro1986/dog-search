@@ -377,8 +377,8 @@ export default function DogBreedSearch() {
               setSelectedBreed(breedName);
               fetchBreedInfo(
                 breedName,
-                // "chatgpt", // Используем ChatGPT как источник
-                "default",
+                "chatgpt", // Используем ChatGPT как источник
+                // "default",
                 setInfoContent,
                 setBreedInfo,
                 setIsLoading,

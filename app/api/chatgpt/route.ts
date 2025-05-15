@@ -78,11 +78,40 @@ export async function POST(req: Request) {
     }
 
     const data = await res.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    let content = data.choices?.[0]?.message?.content || "";
 
-    // Markdown image extraction
-    const match = content.match(/!\[.*?\]\((.*?)\)/);
-    const imageUrl = match?.[1] || null;
+    // Генерация изображения через DALL-E
+    let imageUrl = null;
+    try {
+      const imagePrompt = `Реалистичное фото породы собак ${breed} в высоком качестве`;
+      const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          prompt: imagePrompt,
+          n: 1,
+          size: "1024x1024",
+          response_format: "url"
+        })
+      });
+      
+      const imageData = await imageResponse.json();
+      imageUrl = imageData.data?.[0]?.url || null;
+      
+      // Вставляем изображение в правильную секцию Markdown
+      const imageSection = `4. **Markdown-изображение** — в формате ![${breed}](${imageUrl})`;
+      content = content.replace(/4\..+?(\n|$)/, imageSection + '\n');
+      
+      // Удаляем все остальные упоминания upload.wikimedia.org
+      content = content.replace(/!\[.*?\]\(https?:\/\/upload\.wikimedia\.org[^\)]+\)/g, '');
+      
+    } catch (imageError) {
+      console.error('Ошибка генерации изображения:', imageError);
+      imageUrl = "/images/dog-placeholder.jpg";
+    }
 
     // Проверка: если GPT вернул "Информация отсутствует"
     const isMissing = /информация о.*отсутствует/i.test(content);
@@ -92,7 +121,7 @@ export async function POST(req: Request) {
         ? "Информация о данной породе отсутствует."
         : content.trim(),
       markdown: content.trim(),
-      imageUrl,
+      imageUrl: imageUrl,
     });
   } catch (err: any) {
     clearTimeout(timeout);
