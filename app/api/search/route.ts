@@ -14,6 +14,7 @@ export async function POST(req: Request) {
     if (isLatin) {
       const localMatch = await searchBreedCache(name);
       if (localMatch) {
+        console.log("Returning cached data");
         return Response.json({
           source: "local_cache",
           result: localMatch,
@@ -52,33 +53,66 @@ async function fetchFromWikipedia(
 ) {
   const wikiQuery = encodeURIComponent(name.replace(/ /g, "_"));
   const wikiUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${wikiQuery}`;
-  const wikiRes = await fetch(wikiUrl);
+  
+  try {
+    const wikiRes = await fetch(wikiUrl);
 
-  if (!wikiRes.ok) {
-    if (throwOnFail) throw new Error(`Wikipedia error ${wikiRes.status}`);
+    if (!wikiRes.ok) {
+      // Вместо выброса ошибки, возвращаем запасной вариант
+      if (throwOnFail) {
+        console.log(`Wikipedia page not found for "${name}" in ${lang} language`);
+        return Response.json({
+          source: "fallback",
+          result: {
+            title: name,
+            text: `Информация о породе "${name}" не найдена в Википедии. Пожалуйста, проверьте правильность написания или попробуйте другой язык.`,
+            temperament: "",
+            lifeSpan: "",
+            image: null,
+            url: null,
+          },
+        });
+      }
+      return null;
+    }
+
+    const wiki = await wikiRes.json();
+
+    if (validateContent && !isValidDogExtract(name, wiki.extract)) {
+      return Response.json(
+        {
+          error: "Похоже, вы ввели не название породы собаки.",
+        },
+        { status: 400 }
+      );
+    }
+
+    return Response.json({
+      source: "wikipedia",
+      result: {
+        title: wiki.title,
+        text: wiki.extract,
+        temperament: "",
+        lifeSpan: "",
+        image: wiki.thumbnail?.source || null,
+        url: wiki.content_urls?.desktop?.page || null,
+      },
+    });
+  } catch (error) {
+    console.error(`Error fetching from Wikipedia: ${error}`);
+    if (throwOnFail) {
+      return Response.json({
+        source: "error",
+        result: {
+          title: name,
+          text: `Произошла ошибка при получении информации о породе "${name}". Пожалуйста, попробуйте позже.`,
+          temperament: "",
+          lifeSpan: "",
+          image: null,
+          url: null,
+        },
+      });
+    }
     return null;
   }
-
-  const wiki = await wikiRes.json();
-
-  if (validateContent && !isValidDogExtract(name, wiki.extract)) {
-    return Response.json(
-      {
-        error: "Похоже, вы ввели не название породы собаки.",
-      },
-      { status: 400 }
-    );
-  }
-
-  return Response.json({
-    source: "wikipedia",
-    result: {
-      title: wiki.title,
-      text: wiki.extract,
-      temperament: "",
-      lifeSpan: "",
-      image: wiki.thumbnail?.source || null,
-      url: wiki.content_urls?.desktop?.page || null,
-    },
-  });
 }
