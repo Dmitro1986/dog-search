@@ -1,6 +1,8 @@
 /** @format */
 
-import { searchBreedCache, isValidDogExtract } from "@/components/dog-utils";
+import { isValidDogExtract } from "@/components/dog-utils";
+// Импортируем серверный сервис кеширования
+import { searchBreedCache } from "@/services/server-cache-service";
 
 export async function POST(req: Request) {
   const { query } = await req.json();
@@ -12,14 +14,17 @@ export async function POST(req: Request) {
 
   try {
     if (isLatin) {
-      const localMatch = await searchBreedCache(name);
-      if (localMatch) {
-        console.log("Returning cached data");
+      // Проверяем кеш (только для чтения)
+      const cachedMatch = searchBreedCache(name);
+      if (cachedMatch) {
+        console.log("Возвращаем данные из кеша");
         return Response.json({
-          source: "local_cache",
-          result: localMatch,
+          source: "cache",
+          result: cachedMatch,
         });
       }
+      
+      // Если нет в кеше, получаем из Wikipedia
       return await fetchFromWikipedia(name, "en");
     }
 
