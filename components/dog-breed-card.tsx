@@ -7,9 +7,15 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WikipediaModal } from "./wikipedia-modal";
-import type { DogBreed as BaseDogBreed } from "@/lib/dog-api";
+import type { DogBreed } from "@/types/breed";
 
-interface ExtendedDogBreed extends BaseDogBreed {
+interface ExtendedDogBreed {
+  name: string;
+  origin: string;
+  temperament: string;
+  lifeSpan: string;
+  description: string;
+  imageUrl: string;
   isMarkdown?: boolean;
   markdownContent?: string;
   wikiUrl?: string;
@@ -89,12 +95,9 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
           {!containsMarkdownImage && resolvedImageUrl && (
             <div className="w-full max-h-[400px] overflow-hidden rounded-md flex justify-center bg-muted">
               <img
-                src={resolvedImageUrl}
+                src={breed.imageUrl ? `/api/proxy-image?url=${encodeURIComponent(breed.imageUrl)}` : '/placeholder.jpg'}
                 alt={breed.name}
-                className="rounded-md object-contain max-h-[400px] w-auto"
-                onError={(e) => {
-                  e.currentTarget.src = "/placeholder.svg";
-                }}
+                className="w-full h-64 object-cover rounded-lg"
               />
             </div>
           )}

@@ -266,11 +266,9 @@ export default function DogBreedSearch() {
                   variant="outline"
                   size="sm"
                   className="w-full"
-                  disabled={
-                    !selectedBreed ||
-                    (activeSource === "wikipedia" && isLoading)
-                  }
-                  onClick={() =>
+                  disabled={!selectedBreed || isLoading}
+                  onClick={() => {
+                    if (!selectedBreed) return;
                     fetchBreedInfo(
                       selectedBreed,
                       "wikipedia",
@@ -278,13 +276,31 @@ export default function DogBreedSearch() {
                       setBreedInfo,
                       setIsLoading,
                       setActiveSource,
-                      wikiLang // ← прокидываем тот же язык
-                    )
-                  }
+                      wikiLang
+                    );
+                  }}
                 >
-                  {isLoading && activeSource === "wikipedia"
-                    ? "Загрузка..."
-                    : "Спросить Википедию"}
+                  {isLoading ? "Загрузка..." : "Спросить Википедию"}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  disabled={!selectedBreed || isLoading}
+                  onClick={() => {
+                    if (!selectedBreed) return;
+                    fetchBreedInfo(
+                      selectedBreed,
+                      "chatgpt",
+                      setInfoContent,
+                      setBreedInfo,
+                      setIsLoading,
+                      setActiveSource
+                    );
+                  }}
+                >
+                  {isLoading ? "Загрузка..." : "Спросить ChatGPT"}
                 </Button>
               </TabsContent>
             </Tabs>
