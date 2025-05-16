@@ -18,6 +18,13 @@ export function BreedDirectory({ onSelect, lang }: BreedDirectoryProps & { lang?
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    const container = document.querySelector('[role="menu"]');
+    if (container) {
+      container.setAttribute('aria-activedescendant', 'breed-0');
+    }
+  }, [breeds]);
+
+  useEffect(() => {
     const fetchBreeds = async () => {
       setIsLoading(true);
       try {
@@ -61,12 +68,15 @@ export function BreedDirectory({ onSelect, lang }: BreedDirectoryProps & { lang?
   return (
     <div className="mt-6">
       <h4 className="text-sm font-semibold mb-2">Каталог пород</h4>
-      <div className="max-h-64 overflow-y-auto space-y-1">
-        {breeds.map((breed) => (
+      <div className="max-h-64 overflow-y-auto space-y-1" role="menu">
+        {breeds.map((breed, index) => (
           <Button
             key={breed.id}
+            id={`breed-${index}`}
             variant="ghost"
-            className="w-full justify-start text-left text-sm"
+            className="w-full justify-start text-left text-sm focus:bg-accent"
+            role="menuitem"
+            tabIndex={0}
             onClick={async () => {
               if (breed.name) {
                 // Сначала проверяем кеш
@@ -97,6 +107,12 @@ export function BreedDirectory({ onSelect, lang }: BreedDirectoryProps & { lang?
 
                 // Только если нет данных - запрос к GPT
                 onSelect(breed.name, 'chatgpt');
+              }
+            }}
+            onKeyPress={(e) => {
+              if (e.key === "Enter" && breed.name) {
+                // Trigger breed selection logic
+                (e.currentTarget as HTMLElement).click();
               }
             }}
           >
