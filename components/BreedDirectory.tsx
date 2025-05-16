@@ -5,12 +5,15 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EnrichedBreed } from "@/types";
+import { searchBreedCache } from "@/services/client-cache-service";
+import { fetchWikipediaData } from "@/lib/fetch-wikipedia-data"; // Добавляем импорт
 
 interface BreedDirectoryProps {
-  onSelect: (name: string) => void;
+  onSelect: (name: string, lang?: string) => void;
+  lang?: string;
 }
 
-export function BreedDirectory({ onSelect }: BreedDirectoryProps) {
+export function BreedDirectory({ onSelect, lang }: BreedDirectoryProps & { lang?: string }) {
   const [breeds, setBreeds] = useState<EnrichedBreed[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,7 +21,7 @@ export function BreedDirectory({ onSelect }: BreedDirectoryProps) {
     const fetchBreeds = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch("/api/breeds");
+        const res = await fetch(`/api/breeds?lang=${lang || 'en'}`);
         const data = await res.json();
         console.log("📥 Породы из /api/breeds:", data);
         // Фильтруем только те объекты, у которых есть имя
@@ -32,9 +35,8 @@ export function BreedDirectory({ onSelect }: BreedDirectoryProps) {
         setIsLoading(false);
       }
     };
-
-    fetchBreeds();
-  }, []);
+    fetchBreeds(); // ← Добавляем вызов функции
+  }, [lang]);
 
   if (isLoading) {
     return (
@@ -65,9 +67,36 @@ export function BreedDirectory({ onSelect }: BreedDirectoryProps) {
             key={breed.id}
             variant="ghost"
             className="w-full justify-start text-left text-sm"
-            onClick={() => {
+            onClick={async () => {
               if (breed.name) {
-                onSelect(breed.name);
+                // Сначала проверяем кеш
+                const cached = await searchBreedCache(breed.name);
+                if (cached) {
+                  onSelect(breed.name, 'cache');
+                  return;
+                }
+                
+                // Затем проверяем Википедию через API
+                try {
+                  const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: breed.name, lang })
+                  });
+                  
+                  if (response.ok) {
+                    const data = await response.json();
+                    if (data?.result?.text) {
+                      onSelect(breed.name, 'wikipedia');
+                      return;
+                    }
+                  }
+                } catch (wikiError) {
+                  console.error('Ошибка запроса к Википедии:', wikiError);
+                }
+
+                // Только если нет данных - запрос к GPT
+                onSelect(breed.name, 'chatgpt');
               }
             }}
           >

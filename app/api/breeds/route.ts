@@ -118,18 +118,22 @@ async function readCache(): Promise<CacheData | null> {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const lang = searchParams.get('lang') || 'en';
+
   try {
     const cache = await readCache();
     const now = Date.now();
 
     if (cache && now - cache.timestamp < CACHE_TTL_MS) {
-      console.log("Returning cached data");
-      return NextResponse.json(cache.breeds);
+      const localizedBreeds = localizeBreeds(cache.breeds, lang);
+      return NextResponse.json(localizedBreeds);
     }
 
     const breeds = await fetchAndCacheBreeds(cache);
-    return NextResponse.json(breeds);
+    const localizedBreeds = localizeBreeds(breeds, lang);
+    return NextResponse.json(localizedBreeds);
   } catch (err) {
     const cache = await readCache();
     if (cache?.breeds) {
@@ -142,4 +146,21 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+
+function localizeBreeds(breeds: EnrichedBreed[], lang: string) {
+  return breeds.map(breed => ({
+    ...breed,
+    wikipedia_url: getLocalizedWikiUrl(breed, lang)
+  }));
+}
+
+function getLocalizedWikiUrl(breed: EnrichedBreed, lang: string) {
+  if (lang === 'ru' && breed.wikipedia_url) {
+    return breed.wikipedia_url.replace('/en.wikipedia.org/', '/ru.wikipedia.org/');
+  }
+  if (lang === 'uk' && breed.wikipedia_url) {
+    return breed.wikipedia_url.replace('/en.wikipedia.org/', '/uk.wikipedia.org/');
+  }
+  return breed.wikipedia_url;
 }

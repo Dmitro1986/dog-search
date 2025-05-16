@@ -326,7 +326,7 @@ export default function DogBreedSearch() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {/* 2.1 Селектор языка */}
+              {/* Селектор языка */}
               <div className="flex items-center gap-2">
                 <label htmlFor="wiki-lang" className="text-xs">
                   Язык:
@@ -343,7 +343,7 @@ export default function DogBreedSearch() {
                 </select>
               </div>
 
-              {/* 2.2 Кнопка */}
+              {/* Кнопка */}
               <Button
                 variant="outline"
                 size="sm"
@@ -359,7 +359,7 @@ export default function DogBreedSearch() {
                     setBreedInfo,
                     setIsLoading,
                     setActiveSource,
-                    wikiLang // ← прокидываем выбранный язык
+                    wikiLang
                   )
                 }
               >
@@ -372,17 +372,16 @@ export default function DogBreedSearch() {
 
           {/* Каталог пород */}
           <BreedDirectory
-            onSelect={(breedName) => {
+            onSelect={(breedName, lang) => {
               setSearchQuery(breedName);
-              setSelectedBreed(breedName);
               fetchBreedInfo(
                 breedName,
-                "chatgpt", // Используем ChatGPT как источник
-                // "default",
+                "default",
                 setInfoContent,
                 setBreedInfo,
                 setIsLoading,
-                setActiveSource
+                setActiveSource,
+                lang
               );
             }}
           />

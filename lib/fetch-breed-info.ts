@@ -2,6 +2,8 @@
 
 import { Dispatch, SetStateAction } from "react";
 
+import { searchBreedCache } from "@/services/client-cache-service";
+
 interface BreedInfo {
   name: string;
   origin: string;
@@ -17,7 +19,7 @@ interface BreedInfo {
 
 export async function fetchBreedInfo(
   breed: string,
-  source: "default" | "wikipedia" | "chatgpt" = "default",
+  source: "default" | "wikipedia" | "chatgpt" | "cache" = "default",
   setInfoContent: Dispatch<SetStateAction<string>>,
   setBreedInfo: Dispatch<SetStateAction<BreedInfo | null>>,
   setIsLoading: Dispatch<SetStateAction<boolean>>,
@@ -27,9 +29,23 @@ export async function fetchBreedInfo(
   lang: string = "en"
 ) {
   setIsLoading(true);
-  if (source !== "default") setActiveSource(source);
-
+  
   try {
+    // Добавляем проверку кеша первым шагом
+    const cachedData = await searchBreedCache(breed);
+    if (cachedData && source === 'default') {
+      setBreedInfo({
+        name: breed,
+        origin: "Кеш",
+        description: cachedData.text,
+        imageUrl: cachedData.image,
+        wikiUrl: cachedData.url,
+        isMarkdown: false,
+      });
+      setActiveSource('cache');
+      return;
+    }
+
     if (source === "chatgpt") {
       const response = await fetch("/api/chatgpt", {
         method: "POST",
