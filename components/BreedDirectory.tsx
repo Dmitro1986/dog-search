@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EnrichedBreed } from "@/types";
 import { searchBreedCache } from "@/services/client-cache-service";
-import { fetchWikipediaData } from "@/lib/fetch-wikipedia-data"; // Добавляем импорт
+// Удалить строку с импортом fetch-wikipedia-data
 
 interface BreedDirectoryProps {
   onSelect: (name: string, lang?: string) => void;

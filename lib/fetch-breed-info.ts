@@ -24,7 +24,7 @@ export async function fetchBreedInfo(
   setBreedInfo: Dispatch<SetStateAction<BreedInfo | null>>,
   setIsLoading: Dispatch<SetStateAction<boolean>>,
   setActiveSource: Dispatch<
-    SetStateAction<"none" | "wikipedia" | "chatgpt" | "dogapi">
+    SetStateAction<"none" | "wikipedia" | "chatgpt" | "dogapi" | "cache">
   >,
   lang: string = "en"
 ) {

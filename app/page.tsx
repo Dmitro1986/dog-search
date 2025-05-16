@@ -20,7 +20,7 @@ export default function DogBreedSearch() {
   const [breedInfo, setBreedInfo] = useState<any>(null);
   const [infoContent, setInfoContent] = useState("");
   const [activeSource, setActiveSource] = useState<
-    "none" | "wikipedia" | "chatgpt" | "dogapi"
+    "none" | "wikipedia" | "chatgpt" | "dogapi" | "cache"
   >("none");
 
   const [isLoading, setIsLoading] = useState(false);
