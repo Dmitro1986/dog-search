@@ -97,7 +97,7 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
               <img
                 src={breed.imageUrl ? `/api/proxy-image?url=${encodeURIComponent(breed.imageUrl)}` : '/placeholder.jpg'}
                 alt={breed.name}
-                className="w-full h-64 object-cover rounded-lg"
+                className="w-full h-auto object-cover rounded-lg"
               />
             </div>
           )}
