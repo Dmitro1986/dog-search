@@ -48,7 +48,7 @@ export function BreedDirectory({ onSelect, lang }: BreedDirectoryProps & { lang?
   if (isLoading) {
     return (
       <div className="mt-6">
-        <h4 className="text-sm font-semibold mb-2">Каталог пород</h4>
+        <h4 className="text-sm font-semibold mb-2"> пород</h4>
         <div className="max-h-64 overflow-y-auto space-y-1">
           {Array.from({ length: 5 }).map((_, i) => (
             <Button
@@ -67,7 +67,7 @@ export function BreedDirectory({ onSelect, lang }: BreedDirectoryProps & { lang?
 
   return (
     <div className="mt-6">
-      <h4 className="text-sm font-semibold mb-2">Каталог пород</h4>
+      <h4 className="text-sm font-semibold mb-2"> пород</h4>
       <div className="max-h-64 overflow-y-auto space-y-1" role="menu">
         {breeds.map((breed, index) => (
           <Button

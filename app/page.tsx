@@ -13,6 +13,7 @@ import { fetchBreedInfo } from "@/lib/fetch-breed-info";
 import { BreedDirectory } from "@/components/BreedDirectory";
 import { PawPrint } from "lucide-react";
 import { X } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 
 export default function DogBreedSearch() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -190,7 +191,7 @@ export default function DogBreedSearch() {
           {/* Вкладки на мобилке */}
           <div className="md:hidden border-t border-b">
             <Tabs defaultValue="search" className="w-full">
-              <TabsList className="grid grid-cols-3 w-full">
+              <TabsList className="grid grid-cols-3 w-full bg-card md:bg-transparent">
                 <TabsTrigger value="search">Каталог</TabsTrigger>
                 <TabsTrigger value="chatgpt">ChatGPT</TabsTrigger>
                 <TabsTrigger value="wikipedia">Википедия</TabsTrigger>
@@ -281,26 +282,6 @@ export default function DogBreedSearch() {
                   }}
                 >
                   {isLoading ? "Загрузка..." : "Спросить Википедию"}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  disabled={!selectedBreed || isLoading}
-                  onClick={() => {
-                    if (!selectedBreed) return;
-                    fetchBreedInfo(
-                      selectedBreed,
-                      "chatgpt",
-                      setInfoContent,
-                      setBreedInfo,
-                      setIsLoading,
-                      setActiveSource
-                    );
-                  }}
-                >
-                  {isLoading ? "Загрузка..." : "Спросить ChatGPT"}
                 </Button>
               </TabsContent>
             </Tabs>
@@ -404,12 +385,12 @@ export default function DogBreedSearch() {
         </aside>
       </main>
 
-      <footer className="bg-card text-card-foreground border-t p-4">
+      <footer className="bg-muted text-muted-foreground border-t p-4">
         <div className="max-w-6xl mx-auto">
           {isLoading ? (
             <p className="text-center text-gray-500">Загрузка информации...</p>
           ) : infoContent ? (
-            <div className="p-4 bg-muted text-muted-foreground rounded-lg border border-border">
+            <div className="p-4 bg-background text-foreground rounded-lg border border-border">
               <h3 className="text-sm font-medium mb-2 flex items-center">
                 <Info className="h-4 w-4 mr-2" />
                 Информация о породе {selectedBreed}
@@ -418,24 +399,11 @@ export default function DogBreedSearch() {
                 </span>
               </h3>
 
-              {activeSource === "chatgpt" ? (
-                <div className="text-sm [&>p]:mb-2">
-                  {infoContent.split("\n").map((paragraph, i) => {
-                    const processedParagraph = paragraph.replace(
-                      /\[(.*?)\]\((.*?)\)/g,
-                      '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">$1</a>'
-                    );
-                    return (
-                      <p
-                        key={i}
-                        dangerouslySetInnerHTML={{ __html: processedParagraph }}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-sm whitespace-pre-line">{infoContent}</p>
-              )}
+              {infoContent && (
+  <div className="prose wikipedia-content max-w-none">
+    <ReactMarkdown>{infoContent}</ReactMarkdown>
+  </div>
+)}
             </div>
           ) : breedInfo ? (
             <p className="text-center text-gray-500">
