@@ -40,6 +40,18 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
   const [resolvedImageUrl, setResolvedImageUrl] = useState<string | null>(null);
   const [isWikiOpen, setIsWikiOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  // Добавляем состояние для языка, используя язык из breed если он есть, или ru по умолчанию
+  const [currentLang, setCurrentLang] = useState<string>(breed.lang || "ru");
+  // Функция локализации URL Википедии
+  const getLocalizedWikiLink = (href: string): string => {
+    if (href?.includes("wikipedia.org")) {
+      // Заменяем любой языковой префикс на текущий язык
+      return href.replace(/\/([a-z]{2})\.wikipedia\.org\//i, `/${currentLang}.wikipedia.org/`);
+    }
+    return href;
+  };
+
+  // Оставшийся код..
 
   const isMarkdown =
     breed.isMarkdown || breed.origin === "ChatGPT" || !!breed.markdownContent;
@@ -116,9 +128,41 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
+
                   a: ({ href, children, ...props }) => {
                     const isWiki = href?.includes("wikipedia.org");
+                    
+                    const getLocalizedWikiLink = (href: string | undefined): string => {
+                      if (!href) return '';
+                      
+                      console.log("Оригинальный URL:", href, "Текущий язык:", currentLang);
+                      
+                      // Более надёжная замена, которая работает для всех форматов URL Wikipedia
+                      if (href.includes("wikipedia.org")) {
+                        // Заменяем любой языковой домен на текущий язык
+                        const localizedUrl = href.replace(/\/\/([a-z]{2})\.wikipedia\.org\//i, `//${currentLang}.wikipedia.org/`);
+                        console.log("Локализованный URL:", localizedUrl);
+                        return localizedUrl;
+                      }
+                      return href;
+                    };
+
+
+                    // Сначала объявляем функцию
+                    // const getLocalizedWikiLink = (href: string | undefined): string => {
+                    //   if (!href) return ''; // Если href undefined, возвращаем пустую строку
+                      
+                    //   if (href.includes("wikipedia.org")) {
+                    //     return href.replace(/\/([a-z]{2})\.wikipedia\.org\//i, `/${currentLang}.wikipedia.org/`);
+                    //   }
+                    //   return href;
+                    // };
+                    
+                    // Затем используем её
+                    const localizedHref = getLocalizedWikiLink(href);
+                    
                     return isWiki ? (
+                      // ... остальной код без изменений
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -131,7 +175,7 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
                     ) : (
                       <a
                         {...props}
-                        href={href}
+                        href={localizedHref} // Используем локализованную ссылку
                         className="text-primary underline hover:opacity-80"
                         target="_blank"
                         rel="noopener noreferrer"
@@ -140,6 +184,8 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
                       </a>
                     );
                   },
+
+                
                   p: ({ node, ...props }) => (
                     <p className="text-sm" {...props} />
                   ),
@@ -183,7 +229,8 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
         breedName={breed.name}
         isOpen={isWikiOpen}
         onClose={() => setIsWikiOpen(false)}
-        defaultLang="ru"
+        //defaultLang="ru"
+        defaultLang={currentLang as "ru" | "en" | "uk"} // Используем текущий язык
       />
       
       <ImageModal

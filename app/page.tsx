@@ -1,7 +1,8 @@
 /** @format */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+//import { useState } from "react";
 import { Search, Info, BookOpen, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,39 @@ export default function DogBreedSearch() {
   const [showDirectory, setShowDirectory] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [wikiLang, setWikiLang] = useState<"ru" | "uk" | "en">("en");
+
+  useEffect(() => {
+
+   
+
+    try {
+      const savedState = sessionStorage.getItem('dogSearchState');
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        setBreedInfo(parsedState.breedInfo);
+        setInfoContent(parsedState.infoContent);
+        setActiveSource(parsedState.activeSource);
+        setSelectedBreed(parsedState.selectedBreed);
+        setSearchQuery(parsedState.selectedBreed);
+        setHasSearched(parsedState.hasSearched);
+      }
+    } catch (error) {
+      console.error('Ошибка восстановления состояния:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const stateToSave = {
+      breedInfo,
+      infoContent,
+      activeSource,
+      selectedBreed,
+      searchQuery,
+      hasSearched,
+    };
+  
+    sessionStorage.setItem("dogSearchState", JSON.stringify(stateToSave));
+  }, [breedInfo, infoContent, activeSource, selectedBreed, searchQuery, hasSearched]);
 
   const handleSearch = async () => {
     if (searchQuery.trim()) {
