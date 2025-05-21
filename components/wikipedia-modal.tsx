@@ -19,6 +19,16 @@ interface WikipediaModalProps {
   defaultLang?: "ru" | "en" | "uk";
 }
 
+// Маппинг названий пород для разных языков
+const breedNameMappings: Record<string, Record<string, string[]>> = {
+  "Shih Tzu": {
+    "ru": ["Ши-тцу", "Ши тцу"],
+    "uk": ["Ши-тцу", "Ши тцу"],
+    "en": ["Shih Tzu", "Shih-Tzu"]
+  },
+  // Добавьте другие породы при необходимости
+};
+
 export function WikipediaModal({
   breedName,
   isOpen,
@@ -30,6 +40,26 @@ export function WikipediaModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Получить варианты названий для породы на данном языке
+  const getBreedNameVariants = (name: string, language: string): string[] => {
+    // Проверяем, есть ли специальные варианты для этой породы
+    if (breedNameMappings[name] && breedNameMappings[name][language]) {
+      return breedNameMappings[name][language];
+    }
+    
+    // Если нет специальных вариантов, создаем базовые:
+    // 1. Оригинальное название
+    // 2. С заменой дефисов на пробелы
+    // 3. С заменой пробелов на дефисы
+    const variants = [
+      name,
+      name.replace(/-/g, ' '),
+      name.replace(/\s+/g, '-')
+    ];
+    
+    return [...new Set(variants)]; // Убираем дубликаты
+  };
+
   const fetchWikipediaHTML = async () => {
     setIsLoading(true);
     setError("");
@@ -39,41 +69,50 @@ export function WikipediaModal({
     let success = false;
 
     for (const currentLang of languageOrder) {
-      const apiUrl = `https://${currentLang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
-        breedName
-      )}`;
+      // Получаем варианты названий для текущего языка
+      const nameVariants = getBreedNameVariants(breedName, currentLang);
+      
+      // Пробуем каждый вариант имени
+      for (const nameVariant of nameVariants) {
+        const apiUrl = `https://${currentLang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+          nameVariant
+        )}`;
 
-      console.log("📥 Wikipedia fetch:", apiUrl);
+        console.log("📥 Wikipedia fetch:", apiUrl);
 
-      try {
-        const res = await fetch(apiUrl);
-        if (!res.ok) continue;
+        try {
+          const res = await fetch(apiUrl);
+          if (!res.ok) continue;
 
-        const data = await res.json();
-        if (!data.extract) continue;
+          const data = await res.json();
+          if (!data.extract) continue;
 
-        const html = `
-          <h1 class="text-2xl font-bold mb-4">${data.title}</h1>
-          <p>${data.extract}</p>
-          ${
-            data.thumbnail?.source
-              ? `<img src="${data.thumbnail.source}" class="mt-4 rounded-md max-w-full h-auto border" />`
-              : ""
-          }
-          <div class="mt-4">
-            <a href="${
-              data.content_urls.desktop.page
-            }" target="_blank" class="text-blue-600 hover:underline">Читать на Википедии</a>
-          </div>
-        `;
+          const html = `
+            <h1 class="text-2xl font-bold mb-4">${data.title}</h1>
+            <p>${data.extract}</p>
+            ${
+              data.thumbnail?.source
+                ? `<img src="${data.thumbnail.source}" class="mt-4 rounded-md max-w-full h-auto border" />`
+                : ""
+            }
+            <div class="mt-4">
+              <a href="${
+                data.content_urls.desktop.page
+              }" target="_blank" class="text-blue-600 hover:underline">Читать на Википедии</a>
+            </div>
+          `;
 
-        setHtmlContent(html);
-        setLang(currentLang as any);
-        success = true;
-        break;
-      } catch (err) {
-        console.warn("Wikipedia fetch error:", err);
+          setHtmlContent(html);
+          setLang(currentLang as any);
+          success = true;
+          break;
+        } catch (err) {
+          console.warn("Wikipedia fetch error:", err);
+        }
       }
+      
+      // Если успешно получили данные с текущим языком, прекращаем перебор
+      if (success) break;
     }
 
     if (!success) {
@@ -87,7 +126,7 @@ export function WikipediaModal({
     if (isOpen && breedName) {
       fetchWikipediaHTML();
     }
-  }, [isOpen, breedName]);
+  }, [isOpen, breedName, lang]); // Добавлен lang, чтобы перезагружать при изменении языка
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
