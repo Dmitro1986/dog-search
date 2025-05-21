@@ -100,15 +100,6 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
         <CardContent className="space-y-4">
           {!containsMarkdownImage && resolvedImageUrl && (
             <div className="w-full flex justify-center items-center bg-muted rounded-md overflow-hidden min-h-[220px] md:min-h-[320px] lg:min-h-[400px]">
-<<<<<<< HEAD
-            <img
-              src={breed.imageUrl ? `/api/proxy-image?url=${encodeURIComponent(breed.imageUrl)}` : '/placeholder.jpg'}
-              alt={breed.name}
-              className="w-full max-w-3xl h-auto aspect-video object-contain md:object-cover rounded-lg transition-all duration-300"
-              style={{ maxHeight: '400px' }}
-            />
-          </div>
-=======
               <img
                 src={imageUrlToDisplay}
                 alt={breed.name}
@@ -117,7 +108,6 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
                 onClick={() => setIsImageModalOpen(true)}
               />
             </div>
->>>>>>> fix-image-extraction
           )}
 
           <div className="space-y-2">
