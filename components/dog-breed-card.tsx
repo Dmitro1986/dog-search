@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WikipediaModal } from "./wikipedia-modal";
+import { ImageModal } from "./image-modal";
 import type { DogBreed } from "@/types/breed";
 
 interface ExtendedDogBreed {
@@ -38,6 +39,7 @@ function extractFileNameFromContent(content: string): string | null {
 export function DogBreedCard({ breed }: DogBreedCardProps) {
   const [resolvedImageUrl, setResolvedImageUrl] = useState<string | null>(null);
   const [isWikiOpen, setIsWikiOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const isMarkdown =
     breed.isMarkdown || breed.origin === "ChatGPT" || !!breed.markdownContent;
@@ -79,6 +81,10 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
     };
   }, [breed.imageUrl, extractedFileName, containsMarkdownImage]);
 
+  const imageUrlToDisplay = breed.imageUrl 
+    ? `/api/proxy-image?url=${encodeURIComponent(breed.imageUrl)}` 
+    : '/placeholder.jpg';
+
   return (
     <>
       <Card className="w-full bg-card text-card-foreground border border-border shadow-sm">
@@ -94,6 +100,7 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
         <CardContent className="space-y-4">
           {!containsMarkdownImage && resolvedImageUrl && (
             <div className="w-full flex justify-center items-center bg-muted rounded-md overflow-hidden min-h-[220px] md:min-h-[320px] lg:min-h-[400px]">
+<<<<<<< HEAD
             <img
               src={breed.imageUrl ? `/api/proxy-image?url=${encodeURIComponent(breed.imageUrl)}` : '/placeholder.jpg'}
               alt={breed.name}
@@ -101,6 +108,16 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
               style={{ maxHeight: '400px' }}
             />
           </div>
+=======
+              <img
+                src={imageUrlToDisplay}
+                alt={breed.name}
+                className="w-full max-w-3xl h-auto aspect-video object-contain md:object-cover rounded-lg transition-all duration-300 cursor-pointer hover:opacity-90"
+                style={{ maxHeight: '400px' }}
+                onClick={() => setIsImageModalOpen(true)}
+              />
+            </div>
+>>>>>>> fix-image-extraction
           )}
 
           <div className="space-y-2">
@@ -113,7 +130,10 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
                     const isWiki = href?.includes("wikipedia.org");
                     return isWiki ? (
                       <button
-                        onClick={() => setIsWikiOpen(true)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsWikiOpen(true);
+                        }}
                         className="text-primary underline hover:opacity-80"
                       >
                         {children}
@@ -136,8 +156,9 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
                   img: ({ node, ...props }) => (
                     <img
                       {...props}
-                      className="rounded-md max-w-full h-auto border border-border shadow-sm my-4"
+                      className="rounded-md max-w-full h-auto border border-border shadow-sm my-4 cursor-pointer hover:opacity-90"
                       alt={props.alt || ""}
+                      onClick={() => setIsImageModalOpen(true)}
                       onError={(e) => {
                         e.currentTarget.src = "/placeholder.svg";
                       }}
@@ -173,6 +194,13 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
         isOpen={isWikiOpen}
         onClose={() => setIsWikiOpen(false)}
         defaultLang="ru"
+      />
+      
+      <ImageModal
+        isOpen={isImageModalOpen}
+        onClose={() => setIsImageModalOpen(false)}
+        imageUrl={imageUrlToDisplay}
+        altText={breed.name}
       />
     </>
   );
