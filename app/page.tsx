@@ -1,36 +1,79 @@
 /** @format */
 "use client";
 
-import { useState } from "react";
-import { Search, Info, BookOpen, MessageSquare } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Info, BookOpen, MessageSquare, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DogBreedCard } from "@/components/dog-breed-card";
-import { getRandomBreed as getRandomDogBreed, searchBreed as searchDogBreed } from "@/lib/dog-api";
+import { getRandomBreed as getRandomDogBreed } from "@/lib/dog-api";
 import { fetchBreedInfo } from "@/lib/fetch-breed-info";
 import { BreedDirectory } from "@/components/BreedDirectory";
-import { PawPrint } from "lucide-react";
-import { X } from "lucide-react";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 
 export default function DogBreedSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBreed, setSelectedBreed] = useState("");
   const [breedInfo, setBreedInfo] = useState<any>(null);
   const [infoContent, setInfoContent] = useState("");
-  const [activeSource, setActiveSource] = useState<
-    "none" | "wikipedia" | "chatgpt" | "dogapi" | "cache"
-  >("none");
-
+  const [activeSource, setActiveSource] = useState<"none" | "wikipedia" | "chatgpt" | "dogapi" | "cache">("none");
   const [isLoading, setIsLoading] = useState(false);
   const [showDirectory, setShowDirectory] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [wikiLang, setWikiLang] = useState<"ru" | "uk" | "en">("en");
 
+  useEffect(() => {
+    try {
+      const savedState = sessionStorage.getItem("dogSearchState");
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        if (parsedState.selectedBreed && parsedState.infoContent) {
+          setBreedInfo(parsedState.breedInfo);
+          setInfoContent(parsedState.infoContent);
+          setActiveSource(parsedState.activeSource);
+          setSelectedBreed(parsedState.selectedBreed);
+          setSearchQuery(parsedState.selectedBreed);
+          setHasSearched(parsedState.hasSearched);
+        }
+      }
+    } catch (error) {
+      console.error("Ошибка восстановления состояния:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const stateToSave = {
+      breedInfo,
+      infoContent,
+      activeSource,
+      selectedBreed,
+      searchQuery,
+      hasSearched,
+    };
+    sessionStorage.setItem("dogSearchState", JSON.stringify(stateToSave));
+  }, [breedInfo, infoContent, activeSource, selectedBreed, searchQuery, hasSearched]);
+
   const handleSearch = async () => {
     if (searchQuery.trim()) {
+      const cachedState = sessionStorage.getItem("dogSearchState");
+      if (cachedState) {
+        const parsed = JSON.parse(cachedState);
+        if (
+          parsed.selectedBreed === searchQuery &&
+          parsed.infoContent &&
+          parsed.activeSource === "default"
+        ) {
+          console.log("✅ Пропускаем повторный fetch — данные из sessionStorage");
+          setBreedInfo(parsed.breedInfo);
+          setInfoContent(parsed.infoContent);
+          setActiveSource(parsed.activeSource);
+          setHasSearched(true);
+          return;
+        }
+      }
+
       setSelectedBreed(searchQuery);
       setInfoContent("");
       setActiveSource("none");
@@ -47,7 +90,6 @@ export default function DogBreedSearch() {
         setHasSearched(true);
       } catch (err) {
         console.error("Ошибка поиска породы:", err);
-      } finally {
       }
     }
   };
@@ -72,38 +114,10 @@ export default function DogBreedSearch() {
       setHasSearched(true);
     } catch (error) {
       console.error("Ошибка случайной породы:", error);
-    } finally {
     }
   };
 
-  // Добавляем эту функцию mcdown где-нибудь в вашем компоненте
-  const renderWithLinks = (text: string) => {
-    return text.split("\n").map((paragraph, i) => (
-      <p key={i} className="mb-2">
-        {paragraph.split(" ").map((word, j) => {
-          // Ищем markdown-ссылки вида [текст](URL)
-          const match = word.match(/\[(.*?)\]\((.*?)\)/);
-          if (match) {
-            return (
-              <a
-                key={j}
-                href={match[2]}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                {match[1]}{" "}
-              </a>
-            );
-          }
-          return <span key={j}>{word} </span>;
-        })}
-      </p>
-    ));
-  };
-
   return (
-    // <div className="flex flex-col min-h-screen bg-gray-50">
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <main className="flex flex-1 overflow-hidden">
         {/* Левая панель (только на десктопе) */}
@@ -120,9 +134,7 @@ export default function DogBreedSearch() {
                 variant="outline"
                 size="sm"
                 className="w-full"
-                disabled={
-                  !selectedBreed || (activeSource === "chatgpt" && isLoading)
-                }
+                disabled={!selectedBreed || (activeSource === "chatgpt" && isLoading)}
                 onClick={() =>
                   fetchBreedInfo(
                     selectedBreed,
@@ -134,9 +146,7 @@ export default function DogBreedSearch() {
                   )
                 }
               >
-                {isLoading && activeSource === "chatgpt"
-                  ? "Загрузка..."
-                  : "Спросить ChatGPT"}
+                {isLoading && activeSource === "chatgpt" ? "Загрузка..." : "Спросить ChatGPT"}
               </Button>
             </CardContent>
           </Card>
