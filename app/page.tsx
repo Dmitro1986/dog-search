@@ -12,6 +12,8 @@ import { getRandomBreed as getRandomDogBreed } from "@/lib/dog-api";
 import { fetchBreedInfo } from "@/lib/fetch-breed-info";
 import { BreedDirectory } from "@/components/BreedDirectory";
 import ReactMarkdown from "react-markdown";
+import { DogLoader } from "@/components/ui/DogLoader";
+
 
 export default function DogBreedSearch() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -300,7 +302,8 @@ export default function DogBreedSearch() {
           {/* Карточка результата */}
           <div className="flex-1 p-4 overflow-auto">
             {isLoading ? (
-              <p className="text-center text-gray-500">Поиск породы...</p>
+              // <p className="text-center text-gray-500">Поиск породы...</p>
+              <DogLoader />
             ) : breedInfo ? (
               <DogBreedCard breed={breedInfo} />
             ) : hasSearched ? (
@@ -398,7 +401,8 @@ export default function DogBreedSearch() {
       <footer className="bg-muted text-muted-foreground border-t p-4">
         <div className="max-w-6xl mx-auto">
           {isLoading ? (
-            <p className="text-center text-gray-500">Загрузка информации...</p>
+            // <p className="text-center text-gray-500">Загрузка информации...</p>
+            <DogLoader />
           ) : infoContent ? (
             <div className="p-4 bg-background text-foreground rounded-lg border border-border">
               <h3 className="text-sm font-medium mb-2 flex items-center">
