@@ -41,7 +41,7 @@ export function DogBreedCard({ breed }: DogBreedCardProps) {
   const [isWikiOpen, setIsWikiOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   // Добавляем состояние для языка, используя язык из breed если он есть, или ru по умолчанию
-  const [currentLang, setCurrentLang] = useState<string>(breed.lang || "ru");
+  const [currentLang, setCurrentLang] = useState<string>(breed.origin || "ru");
   // Функция локализации URL Википедии
   const getLocalizedWikiLink = (href: string): string => {
     if (href?.includes("wikipedia.org")) {
