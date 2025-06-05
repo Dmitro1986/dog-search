@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import Header from "@/components/ui/header";
 import CacheInitializer from './components/CacheInitializer';
+// import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] })
 

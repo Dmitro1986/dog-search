@@ -15,7 +15,6 @@ import { BreedDirectory } from "@/components/BreedDirectory";
 import ReactMarkdown from "react-markdown";
 import { DogLoader } from "@/components/ui/DogLoader";
 
-
 export default function DogBreedSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBreed, setSelectedBreed] = useState("");
@@ -126,6 +125,7 @@ export default function DogBreedSearch() {
       <main className="flex flex-1 overflow-hidden">
         {/* Левая панель (только на десктопе) */}
         <aside className="w-64 bg-card text-card-foreground border-r p-4 hidden md:block">
+
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium flex items-center">
