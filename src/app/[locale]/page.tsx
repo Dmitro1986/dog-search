@@ -1,6 +1,7 @@
 /** @format */
 "use client";
 
+import { useTranslations } from 'next-intl';
 import { useState, useEffect } from "react";
 import { Search, Info, BookOpen, MessageSquare, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export default function DogBreedSearch() {
   const [showDirectory, setShowDirectory] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [wikiLang, setWikiLang] = useState<"ru" | "uk" | "en">("en");
+  const t = useTranslations();
 
   useEffect(() => {
     try {

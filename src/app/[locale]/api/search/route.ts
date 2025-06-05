@@ -2,7 +2,7 @@
 
 import { isValidDogExtract } from "@/components/dog-utils";
 // Импортируем серверный сервис кеширования
-import { searchBreedCache } from "../../../services/server-cache-service";
+import { searchBreedCache } from "../../../../services/server-cache-service";
 
 
 
