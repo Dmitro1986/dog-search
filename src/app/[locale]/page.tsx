@@ -3,7 +3,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from "react";
-import { Search, Info, BookOpen, MessageSquare, X } from "lucide-react";
+import { Search, BookOpen, MessageSquare, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,8 @@ import { DogBreedCard } from "@/components/dog-breed-card";
 import { getRandomBreed as getRandomDogBreed } from "@/lib/dog-api";
 import { fetchBreedInfo } from "@/lib/fetch-breed-info";
 import { BreedDirectory } from "@/components/BreedDirectory";
-import ReactMarkdown from "react-markdown";
 import { DogLoader } from "@/components/ui/DogLoader";
+import { BubbleChat } from 'flowise-embed-react';
 
 export default function DogBreedSearch() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,7 +25,13 @@ export default function DogBreedSearch() {
   const [showDirectory, setShowDirectory] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [wikiLang, setWikiLang] = useState<"ru" | "uk" | "en">("en");
+  const [isClient, setIsClient] = useState(false);
   const t = useTranslations();
+
+  // Отслеживание клиентского рендеринга для BubbleChat
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     try {
@@ -304,7 +310,6 @@ export default function DogBreedSearch() {
           {/* Карточка результата */}
           <div className="flex-1 p-4 overflow-auto">
             {isLoading ? (
-              // <p className="text-center text-gray-500">Поиск породы...</p>
               <DogLoader />
             ) : breedInfo ? (
               <DogBreedCard breed={breedInfo} />
@@ -402,32 +407,112 @@ export default function DogBreedSearch() {
 
       <footer className="bg-muted text-muted-foreground border-t p-4">
         <div className="max-w-6xl mx-auto">
-          {isLoading ? (
-            // <p className="text-center text-gray-500">Загрузка информации...</p>
-            <DogLoader />
-          ) : infoContent ? (
-            <div className="p-4 bg-background text-foreground rounded-lg border border-border">
-              <h3 className="text-sm font-medium mb-2 flex items-center">
-                <Info className="h-4 w-4 mr-2" />
-                Информация о породе {selectedBreed}
-                <span className="ml-2 text-xs text-muted-foreground">
-                  (Источник: {activeSource})
-                </span>
-              </h3>
-
-              {infoContent && (
-  <div className="prose wikipedia-content max-w-none">
-    <ReactMarkdown>{infoContent}</ReactMarkdown>
-  </div>
-)}
-            </div>
-          ) : breedInfo ? (
-            <p className="text-center text-gray-500">
-              Выберите источник информации
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              🐶 Найди своего любимца
             </p>
-          ) : (
-            <p className="text-center text-gray-500">Найди своего любимца</p>
-          )}
+            <p className="text-xs mt-2 text-muted-foreground">
+              Чат будет доступен после установки flowise-embed-react
+            </p>
+          </div>
+        
+          <BubbleChat
+            chatflowid="151b6fbc-ae45-440e-b01c-a4b38f7a8720"
+            apiHost="https://cloud.flowiseai.com"
+            theme={{    
+              button: {
+                backgroundColor: '#3B81F6',
+                right: 20,
+                bottom: 20,
+                size: 48,
+                dragAndDrop: true,
+                iconColor: 'white',
+                // customIconSrc: 'https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/svg/google-messages.svg',
+                customIconSrc: 'https://thumbs.dreamstime.com/z/%D0%BC%D0%B8-%D1%8B%D0%B9-%D1%81%D1%82%D0%B8-%D1%8C-kawaii-%D1%81%D0%BE%D0%B1%D0%B0%D0%BA%D0%B8-79703026.jpg?ct=jpeg',
+                autoWindowOpen: {
+                  autoOpen: false,
+                  openDelay: 2,
+                  autoOpenOnMobile: false
+                }
+              },
+              tooltip: {
+                showTooltip: true,
+                tooltipMessage: 'Есть вопросы? 🐶',
+                tooltipBackgroundColor: 'hsl(var(--background))',
+                tooltipTextColor: 'hsl(var(--foreground))',
+                tooltipFontSize: 14
+              },
+              disclaimer: {
+                title: 'Помощник по породам собак',
+                message: "Я помогу вам узнать больше о породах собак и ответить на ваши вопросы",
+                textColor: 'hsl(var(--foreground))',
+                buttonColor: '#3B81F6',
+                buttonText: 'Начать общение',
+                buttonTextColor: 'white',
+                blurredBackgroundColor: 'rgba(0, 0, 0, 0.4)',
+                backgroundColor: 'hsl(var(--background))'
+              },
+              chatWindow: {
+                showTitle: true,
+                showAgentMessages: true,
+                title: 'Помощник по породам 🐕',
+                // titleAvatarSrc: 'https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/svg/google-messages.svg',
+                titleAvatarSrc: 'https://media.istockphoto.com/id/501628828/uk/%D0%B2%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D0%BD%D1%96-%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%BD%D1%8F/%D0%BC%D0%BE%D0%BF%D1%81-%D1%81%D0%BE%D0%B1%D0%B0%D0%BA%D0%B0-%D0%B3%D0%BE%D0%BB%D0%BE%D0%B2%D0%B0.jpg?s=612x612&w=is&k=20&c=NluWFBBvRVdHhCNqCtKRFyolowIlh8rRBcXm8-wauFw=',
+                welcomeMessage: 'Привет! Я помогу вам узнать больше о породах собак. Задавайте любые вопросы!',
+                errorMessage: 'Извините, произошла ошибка. Попробуйте еще раз.',
+                backgroundColor: 'hsl(var(--background))',
+                height: 600,
+                width: 400,
+                fontSize: 14,
+                starterPrompts: [
+                  "Какие породы подходят для квартиры?",
+                  "Расскажи о лабрадоре",
+                  "Как выбрать породу собаки?"
+                ],
+                starterPromptFontSize: 13,
+                clearChatOnReload: false,
+                sourceDocsTitle: 'Источники:',
+                renderHTML: true,
+                botMessage: {
+                  backgroundColor: 'hsl(var(--muted))',
+                  textColor: 'hsl(var(--foreground))',
+                  showAvatar: true,
+                  avatarSrc: 'https://thumbs.dreamstime.com/z/%D0%BC%D0%B8-%D1%8B%D0%B9-%D1%81%D1%82%D0%B8-%D1%8C-kawaii-%D1%81%D0%BE%D0%B1%D0%B0%D0%BA%D0%B8-79703026.jpg?ct=jpeg'
+                },
+                userMessage: {
+                  backgroundColor: '#3B81F6',
+                  textColor: '#ffffff',
+                  showAvatar: true,
+                  avatarSrc: 'https://raw.githubusercontent.com/zahidkhawaja/langchain-chat-nextjs/main/public/usericon.png'
+                },
+                textInput: {
+                  placeholder: 'Напишите ваш вопрос о породах собак...',
+                  backgroundColor: 'hsl(var(--background))',
+                  textColor: 'hsl(var(--foreground))',
+                  sendButtonColor: '#3B81F6',
+                  maxChars: 500,
+                  maxCharsWarningMessage: 'Сообщение слишком длинное. Максимум 500 символов.',
+                  autoFocus: false,
+                  sendMessageSound: false,
+                  receiveMessageSound: false
+                },
+                feedback: {
+                  color: 'hsl(var(--muted-foreground))'
+                },
+                dateTimeToggle: {
+                  date: false,
+                  time: false
+                },
+                footer: {
+                  textColor: 'hsl(var(--muted-foreground))',
+                  text: 'Присоединяйтесь в',
+                  company: 'Telegram',
+                  companyLink: '#'
+                }
+              }
+            }}
+          />
+          
         </div>
       </footer>
     </div>
