@@ -1,0 +1,13 @@
+
+{
+  "header": {
+    "title": "Dog Breed Directory",
+    "subtitle": "Choose your perfect breed"
+  },
+  "footer": {
+    "text": "All rights reserved"
+  },
+  "search": "Search",
+  "searchPlaceholder": "Enter dog breed",
+  "random": "Random breed"
+}

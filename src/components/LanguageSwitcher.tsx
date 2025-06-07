@@ -24,7 +24,7 @@ export default function LanguageSwitcher() {
         className="px-2 py-1 rounded hover:bg-muted disabled:opacity-50"
         disabled={pathname.startsWith('/ru') || isPending}
       >
-        🇺🇦 Рус
+        🇺🇦 рус
       </button>
       <button
         onClick={() => changeLocale('uk')}
@@ -32,6 +32,13 @@ export default function LanguageSwitcher() {
         disabled={pathname.startsWith('/uk') || isPending}
       >
         🇺🇦 Укр
+      </button>
+      <button
+        onClick={() => changeLocale('en')}
+        className="px-2 py-1 rounded hover:bg-muted disabled:opacity-50"
+        disabled={pathname.startsWith('/en') || isPending}
+      >
+        🇬🇧 En
       </button>
     </div>
   );

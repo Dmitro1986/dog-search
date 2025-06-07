@@ -1,0 +1,19 @@
+{
+  "header": {
+    "title": "Каталог порід собак",
+   " subtitle": "Обирайте свою ідеальну породу"
+  },
+  "footer": {
+    "text": "All rights reserved"
+  },
+  "title": "Пошук порід собак",
+  "search": "Пошук",
+  "random": "Випадкова порода",
+  "description": "Введіть назву породи або оберіть з каталогу.",
+    "searchPlaceholder": "Введіть породу собаки",
+    "askWikipedia": "Запитати Вікіпедію",
+    "askChatGPT": "Запитати ChatGPT",
+    "selectSource": "Оберіть джерело інформації",
+    "notFound": "Породу не знайдено.",
+    "findYourPet": "Знайди свого улюбленця"
+  }
