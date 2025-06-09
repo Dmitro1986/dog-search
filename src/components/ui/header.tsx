@@ -62,7 +62,6 @@ export default function Header() {
           <h1 className="text-2xl font-bold inline-flex items-center gap-2 text-foreground">
             <PawPrint className="w-6 h-6 text-primary" />
             {title}
-            {/* <PawPrint className="w-6 h-6 text-primary" /> */}
           </h1>
           <h3 className="text-xl font-bold text-muted-foreground mt-1">
             {subtitle} 🐾

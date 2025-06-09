@@ -1,6 +1,5 @@
-
 {
-  "search": "Search",
-  "searchPlaceholder": "Enter dog breed",
-  "random": "Random breed"
+  "title": "🐶 Dog Breed Search",
+  "description": "Find information about dog breeds and choose the perfect companion.",
+  "working": "Working with new API!"
 }

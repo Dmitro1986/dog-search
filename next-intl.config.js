@@ -1,5 +1,5 @@
 // next-intl.config.js
 module.exports = {
-  locales: ['ru', 'uk', 'en'],
-  defaultLocale: 'en',
+  locales: ['uk', 'ru', 'en'],
+  defaultLocale: 'uk',
 };
