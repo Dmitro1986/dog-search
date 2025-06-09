@@ -1,4 +1,16 @@
 // src/app/layout.tsx - корневой layout с HTML тегами
+
+
+
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "../../styles/globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
+import Header from "@/components/ui/header";
+import CacheInitializer from './components/CacheInitializer';
+
+const inter = Inter({ subsets: ["latin", "cyrillic"] })
 export default function RootLayout({
   children,
 }: {
